@@ -3,7 +3,6 @@
 #include <iostream>
 #include <algorithm>
 
-using namespace std;
 
 Aerodynamics::Aerodynamics(const Atmosphere& atmosphere):atmosphere_(atmosphere)
 {
@@ -11,38 +10,32 @@ Aerodynamics::Aerodynamics(const Atmosphere& atmosphere):atmosphere_(atmosphere)
 
 double Aerodynamics::calculateAirspeed(const AircraftState& state)
 {
-	return sqrt(pow(state.u, 2) + pow(state.v, 2) + pow(state.w, 2));
+	double u2 = state.u * state.u;
+	double v2 = state.v * state.v;
+	double w2 = state.w * state.w;
+	return std::sqrt(u2 + v2 + w2);
 }
 
 double Aerodynamics::calculateAlpha(const AircraftState& state)
 {
-	return atan2(state.w, state.u);
+	return std::atan2(state.w, state.u);
 }
 
 double Aerodynamics::calculateBeta(const AircraftState& state)
 {
-	double Va = this->calculateAirspeed(state);
-	double ratio = state.v / Va;
-	ratio = clamp(ratio, -1.0, 1.0);	
+	double Va = this->calculateAirspeed(state);	
 	if (Va < 1e-06)
 		return 0.0;
-	return asin(ratio);
-
+	return std::asin(std::clamp(state.v / Va, -1.0, 1.0));
 }
 
-double Aerodynamics::calculateDynamicPressure(const AircraftState& state)
-{
-	double airspeed = calculateAirspeed(state);
-	return 0.5 * atmosphere_.getRho() * pow(airspeed, 2);
-}
-
-FlightConditions Aerodynamics::computeFlightCondtions(const AircraftState& state)
+FlightConditions Aerodynamics::computeFlightConditions(const AircraftState& state)
 {
 	FlightConditions fc{};
 	fc.Va = this->calculateAirspeed(state);
 	fc.alpha = this->calculateAlpha(state);
 	fc.beta = this->calculateBeta(state);
-	fc.qbar = this->calculateDynamicPressure(state);
+	fc.qbar = 0.5 * atmosphere_.getRho() * fc.Va * fc.Va;
 	return fc;
 }
 
@@ -51,7 +44,7 @@ double Aerodynamics::calculateLiftCoefficient(const FlightConditions& fc,
 											  const AircraftState& state
 )
 {
-	double Va = max(fc.Va, 1e-6);
+	double Va = std::max(fc.Va, 1e-6);
 	double alpha = fc.alpha;
 	double wing_lift_coefficient = 0.0;
 	double alpha2 = alpha * alpha;
@@ -73,7 +66,8 @@ double Aerodynamics::calculateLiftCoefficient(const FlightConditions& fc,
 double Aerodynamics::calculateDragCoefficient(const FlightConditions& fc)
 {
 	double alpha = fc.alpha;
-	return 0.13 + 0.07*pow((5.5*alpha+0.654),2);
+	double t = 5.5 * alpha + 0.654;
+	return 0.13 + 0.07 * t * t;
 }
 
 double Aerodynamics::calculateSideForceCoefficient(const FlightConditions& fc, const ControlInputs& input)
@@ -91,8 +85,100 @@ AeroCoefficients Aerodynamics::computeAeroCoefficients(const FlightConditions& f
 	aero.CD = this->calculateDragCoefficient(fc);
 	aero.CL = this->calculateLiftCoefficient(fc, input, state);
 	aero.CY = this->calculateSideForceCoefficient(fc, input);
+
+	double St = tail_platform_area;
+	double lt = length_tail;
+	double S = wing_platform_area;
+	double epsilon = depsda * (fc.alpha - alpha_zero_lift_angle_of_attack);
+	double dCMdx_normalization_scalar = cbar / max(fc.Va, 1e-6);
+
+	Eigen::Vector3d eta;
+	eta << -1.4 * fc.beta,
+		   -0.59 - (3.1 * St * lt / (S * cbar)) * (fc.alpha - epsilon),
+			(1 - fc.alpha * (180 / (15 * pi)) * fc.beta);
+
+	//RCAM aerodynamic derivatives (NASA RCAM model)
+	Eigen::Matrix3d dCMdx_matrix;
+	dCMdx_matrix << -11, 0, 5,
+				     0, -4.03 * (St * lt * lt) / (S * cbar * cbar), 0,
+				     1.7, 0, -11.5;
+
+	Eigen::Matrix3d dCMdx;
+	dCMdx = dCMdx_normalization_scalar * dCMdx_matrix;
+
+	Eigen::Vector3d rates;
+	rates << state.p,
+			 state.q,
+			 state.r;
+
+	//RCAM aerodynamic derivatives (NASA RCAM model)
+	Eigen::Matrix3d dCMdu;
+	dCMdu << -0.6, 0, 0.22,
+			  0, -3.1 * St * lt / (S * cbar), 0,
+			  0, 0, -0.63;
+
+	Eigen::Vector3d Inputs;
+	Inputs << input.aileron,
+			  input.elevator,
+			  input.rudder;
+
+	Eigen::Vector3d CM_ac_body;
+	CM_ac_body = eta + dCMdx * rates + dCMdu * Inputs;
+
+	aero.Cl = CM_ac_body(0);
+	aero.Cm = CM_ac_body(1);
+	aero.Cn = CM_ac_body(2);
+
 	return aero;
 }
 
+Eigen::Vector3d Aerodynamics::computeAerodynamicForce(const FlightConditions& fc, const AeroCoefficients& coeff)
+{	
+	double S = wing_platform_area;
+	Eigen::Vector3d Fa_stability;
 
+	Fa_stability << -coeff.CD * fc.qbar * S,
+					 coeff.CY * fc.qbar * S,
+					 coeff.CL * fc.qbar * S;
 
+	// Rotation from the stabilty fram to the body frame
+	Eigen::Matrix3d Cbs;
+	Cbs << std::cos(fc.alpha), 0, -std::sin(fc.alpha),
+		         0,			   1,        0,
+		   std::sin(fc.alpha), 0,  std::cos(fc.alpha);
+
+	Eigen::Vector3d Fa_body = Cbs * Fa_stability;
+
+	return Fa_body;
+}
+
+Eigen::Vector3d Aerodynamics::computeAerodynamicMoments(const FlightConditions& fc,  
+														const AeroCoefficients& coeff,
+	                                                    const Eigen::Vector3d& forceBody)
+{
+	
+	Eigen::Vector3d CM_ac_body;
+	CM_ac_body << coeff.Cl,
+				  coeff.Cm,
+		          coeff.Cn;
+
+	double S = wing_platform_area;
+	Eigen::Vector3d M_ac_body = CM_ac_body * fc.qbar * S * cbar;
+	
+	Eigen::Vector3d M_cg_body =  M_ac_body + (r_ac - r_cg).cross(forceBody);
+	
+	return M_cg_body;
+}
+
+AerodynamicLoads Aerodynamics::computeAerodynamicLoads(const FlightConditions& fc,
+													   const ControlInputs& input, 
+													   const AircraftState& state
+)
+{
+	AerodynamicLoads loads{};
+	AeroCoefficients coeff = computeAeroCoefficients(fc, input, state);
+	loads.force_body = computeAerodynamicForce(fc, coeff);
+	loads.moment_body = computeAerodynamicMoments(fc, coeff, loads.force_body);
+
+	return loads;
+}

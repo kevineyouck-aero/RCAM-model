@@ -1,7 +1,9 @@
 #pragma once
 #include "RCAM_model.h"
 #include "Atmosphere.h"
+#include <Eigen/Dense>
 
+using Eigen::VectorXd;
 
 struct FlightConditions
 {
@@ -23,6 +25,12 @@ struct AeroCoefficients
 	double Cn = 0.0;
 };
 
+struct AerodynamicLoads
+{
+	Eigen::Vector3d force_body;
+	Eigen::Vector3d moment_body;	
+};
+
 class Aerodynamics
 {
 public:
@@ -32,19 +40,33 @@ public:
 	double calculateAirspeed(const AircraftState& state);
 	double calculateAlpha(const AircraftState& state);
 	double calculateBeta(const AircraftState& state);
-	double calculateDynamicPressure(const AircraftState& state);
-	FlightConditions computeFlightCondtions(const AircraftState& state);
+	FlightConditions computeFlightConditions(const AircraftState& state);
 
 	double calculateLiftCoefficient(const FlightConditions& fc, const ControlInputs& input, const AircraftState& state);
 	double calculateDragCoefficient(const FlightConditions& fc);
 	double calculateSideForceCoefficient(const FlightConditions& fc, const ControlInputs& input);
-	AeroCoefficients computeAeroCoefficients(const FlightConditions& fc, const ControlInputs& input, const AircraftState& state);
-	
+
+	AeroCoefficients computeAeroCoefficients(const FlightConditions& fc, 
+											 const ControlInputs& input, 
+											 const AircraftState& state);
+
+	Eigen::Vector3d computeAerodynamicForce(const FlightConditions& fc,	const AeroCoefficients& coeff);
+
+	Eigen::Vector3d computeAerodynamicMoments(const FlightConditions& fc, 
+											  const AeroCoefficients& coeff, 
+										      const Eigen::Vector3d& forceBody);
+
+	AerodynamicLoads computeAerodynamicLoads(const FlightConditions& fc, 
+											 const ControlInputs& input, 
+											 const AircraftState& state											 
+										     );
 private:
 	const Atmosphere& atmosphere_;
 	double pi = std::numbers::pi;
+
 	const double alpha_switch = 14.5 * pi / 180;
 	const double alpha_zero_lift_angle_of_attack = -11.5 * pi / 180;
+
 	static constexpr double cbar = 6.6;
 	static constexpr double length_tail = 24.8;
 	static constexpr double wing_platform_area = 260;
@@ -64,6 +86,8 @@ private:
 	static constexpr double a2 = 609.2;
 	static constexpr double a1 = -155.2;
 	static constexpr double a0 = 15.212;
+	const Eigen::Vector3d r_cg = { x_cg,y_cg,z_cg };
+	const Eigen::Vector3d r_ac = { x_ac,y_ac,z_ac };
 
 };
 
