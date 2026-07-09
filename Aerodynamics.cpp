@@ -13,29 +13,29 @@ double Aerodynamics::calculateAirspeed(const AircraftState& state)
 	double u2 = state.u * state.u;
 	double v2 = state.v * state.v;
 	double w2 = state.w * state.w;
-	return std::sqrt(u2 + v2 + w2);
+	return std::sqrt(u2 + v2 + w2); // computes the aircraft true airspeed in body-axis velocity components
 }
 
 double Aerodynamics::calculateAlpha(const AircraftState& state)
 {
-	return std::atan2(state.w, state.u);
+	return std::atan2(state.w, state.u); // returns the plane angle of attack
 }
 
 double Aerodynamics::calculateBeta(const AircraftState& state)
 {
-	double Va = this->calculateAirspeed(state);	
+	double Va = calculateAirspeed(state);	
 	if (Va < 1e-06)
 		return 0.0;
-	return std::asin(std::clamp(state.v / Va, -1.0, 1.0));
+	return std::asin(std::clamp(state.v / Va, -1.0, 1.0)); // return the plane sideslipe angle 
 }
 
 FlightConditions Aerodynamics::computeFlightConditions(const AircraftState& state)
 {
 	FlightConditions fc{};
-	fc.Va = this->calculateAirspeed(state);
-	fc.alpha = this->calculateAlpha(state);
-	fc.beta = this->calculateBeta(state);
-	fc.qbar = 0.5 * atmosphere_.getRho() * fc.Va * fc.Va;
+	fc.Va = calculateAirspeed(state);						// Calculates the airspeed at the current state
+	fc.alpha = calculateAlpha(state);						// Calculates the current state angle of attack
+	fc.beta = calculateBeta(state);							// Calculates the current state sideslipe angle
+	fc.qbar = 0.5 * atmosphere_.getRho() * fc.Va * fc.Va;	// Calculates the dynamic pressure of the plane
 	return fc;
 }
 
@@ -49,7 +49,13 @@ double Aerodynamics::calculateLiftCoefficient(const FlightConditions& fc,
 	double wing_lift_coefficient = 0.0;
 	double alpha2 = alpha * alpha;
 	double alpha3 = alpha2 * alpha;
-
+	/*
+		Defines an interval set by (alpha_switch) to dress up the wing lift 
+		coefficient that follows a linear pattern when the angle of attack 
+		(alpha) is below (alpha_switch). As soon (alpha) reaches over 
+		(alpha_switch) the wing lift coefficient begins to follow a 
+		polynomial pattern.	
+	*/
 	if (alpha <= alpha_switch)
 		wing_lift_coefficient = n * (alpha - alpha_zero_lift_angle_of_attack);
 	else	
@@ -82,9 +88,9 @@ AeroCoefficients Aerodynamics::computeAeroCoefficients(const FlightConditions& f
 )
 {
 	AeroCoefficients aero{};
-	aero.CD = this->calculateDragCoefficient(fc);
-	aero.CL = this->calculateLiftCoefficient(fc, input, state);
-	aero.CY = this->calculateSideForceCoefficient(fc, input);
+	aero.CD = calculateDragCoefficient(fc);
+	aero.CL = calculateLiftCoefficient(fc, input, state);
+	aero.CY = calculateSideForceCoefficient(fc, input);
 
 	double St = tail_platform_area;
 	double lt = length_tail;
@@ -106,17 +112,19 @@ AeroCoefficients Aerodynamics::computeAeroCoefficients(const FlightConditions& f
 	Eigen::Matrix3d dCMdx;
 	dCMdx = dCMdx_normalization_scalar * dCMdx_matrix;
 
-	Eigen::Vector3d rates;
+	// Angular rates vector [roll, pitch, yaw] expressed in the body frame
+	Eigen::Vector3d rates; 
 	rates << state.p,
 			 state.q,
 			 state.r;
 
-	//RCAM aerodynamic derivatives (NASA RCAM model)
+	// RCAM aerodynamic derivatives (NASA RCAM model)
 	Eigen::Matrix3d dCMdu;
 	dCMdu << -0.6, 0, 0.22,
 			  0, -3.1 * St * lt / (S * cbar), 0,
 			  0, 0, -0.63;
 
+	// Control surface deflections [aileron, elevator, rudder]
 	Eigen::Vector3d Inputs;
 	Inputs << input.aileron,
 			  input.elevator,
@@ -147,7 +155,7 @@ Eigen::Vector3d Aerodynamics::computeAerodynamicForce(const FlightConditions& fc
 		         0,			   1,        0,
 		   std::sin(fc.alpha), 0,  std::cos(fc.alpha);
 
-	Eigen::Vector3d Fa_body = Cbs * Fa_stability;
+	Eigen::Vector3d Fa_body = Cbs * Fa_stability; // Calculates aerodynamic force in body frame
 
 	return Fa_body;
 }
@@ -163,8 +171,11 @@ Eigen::Vector3d Aerodynamics::computeAerodynamicMoments(const FlightConditions& 
 		          coeff.Cn;
 
 	double S = wing_platform_area;
+	
+	// Calculates the body moment about the aerodynamic center
 	Eigen::Vector3d M_ac_body = CM_ac_body * fc.qbar * S * cbar;
 	
+	// Applies a moment transfer to shift body moment to the center of gravity
 	Eigen::Vector3d M_cg_body =  M_ac_body + (r_ac - r_cg).cross(forceBody);
 	
 	return M_cg_body;
@@ -180,5 +191,5 @@ AerodynamicLoads Aerodynamics::computeAerodynamicLoads(const FlightConditions& f
 	loads.force_body = computeAerodynamicForce(fc, coeff);
 	loads.moment_body = computeAerodynamicMoments(fc, coeff, loads.force_body);
 
-	return loads;
+	return loads; // Returns the body aerodynamic moments and forces all at once
 }
