@@ -1,4 +1,4 @@
-#include "Propulsion.h"
+#include "../includes/Propulsion.h"
 
 Propulsion::Propulsion(const Atmosphere& atmosphere, const RCAM_model& rcam, const AircraftGeometry& geometry):
 	atmosphere_(atmosphere),

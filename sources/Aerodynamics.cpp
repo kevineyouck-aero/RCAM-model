@@ -1,4 +1,4 @@
-#include "Aerodynamics.h"
+#include "../includes/Aerodynamics.h"
 #include <cmath>
 #include <iostream>
 #include <algorithm>
@@ -10,7 +10,7 @@ Aerodynamics::Aerodynamics(const Atmosphere& atmosphere, const AircraftGeometry&
 {
 }
 
-double Aerodynamics::calculateAirspeed(const AircraftState& state)
+double Aerodynamics::calculateAirspeed(const AircraftState& state) const 
 {
 	double u2 = state.u * state.u;
 	double v2 = state.v * state.v;
@@ -18,20 +18,20 @@ double Aerodynamics::calculateAirspeed(const AircraftState& state)
 	return std::sqrt(u2 + v2 + w2); // computes the aircraft true airspeed in body-axis velocity components
 }
 
-double Aerodynamics::calculateAlpha(const AircraftState& state)
+double Aerodynamics::calculateAlpha(const AircraftState& state) const
 {
 	return std::atan2(state.w, state.u); // returns the plane angle of attack
 }
 
-double Aerodynamics::calculateBeta(const AircraftState& state)
+double Aerodynamics::calculateBeta(const AircraftState& state) const
 {
 	double Va = calculateAirspeed(state);	
 	if (Va < 1e-06)
 		return 0.0;
-	return std::asin(std::clamp(state.v / Va, -1.0, 1.0)); // return the plane sideslipe angle 
+	return std::asin(std::clamp(state.v / Va, -1.0, 1.0)); // return the plane sideslip angle 
 }
 
-FlightConditions Aerodynamics::computeFlightConditions(const AircraftState& state)
+FlightConditions Aerodynamics::computeFlightConditions(const AircraftState& state) const
 {
 	FlightConditions fc{};
 	fc.Va = calculateAirspeed(state);						// Calculates the airspeed at the current state
@@ -44,7 +44,7 @@ FlightConditions Aerodynamics::computeFlightConditions(const AircraftState& stat
 double Aerodynamics::calculateLiftCoefficient(const FlightConditions& fc,
 											  const ControlInputs& input, 
 											  const AircraftState& state
-)
+) const
 {
 	double Va = std::max(fc.Va, 1e-6);
 	double alpha = fc.alpha;
@@ -71,14 +71,14 @@ double Aerodynamics::calculateLiftCoefficient(const FlightConditions& fc,
 	return wing_lift_coefficient + tail_lift_coefficient;
 }
 
-double Aerodynamics::calculateDragCoefficient(const FlightConditions& fc)
+double Aerodynamics::calculateDragCoefficient(const FlightConditions& fc) const 
 {
 	double alpha = fc.alpha;
 	double t = 5.5 * alpha + 0.654;
 	return 0.13 + 0.07 * t * t;
 }
 
-double Aerodynamics::calculateSideForceCoefficient(const FlightConditions& fc, const ControlInputs& input)
+double Aerodynamics::calculateSideForceCoefficient(const FlightConditions& fc, const ControlInputs& input) const
 {
 	double beta = fc.beta;
 	return -1.6 * beta + 0.24 * input.rudder;
@@ -87,7 +87,7 @@ double Aerodynamics::calculateSideForceCoefficient(const FlightConditions& fc, c
 AeroCoefficients Aerodynamics::computeAeroCoefficients(const FlightConditions& fc, 
 													   const ControlInputs& input,
 													   const AircraftState& state
-)
+) const
 {
 	AeroCoefficients aero{};
 	aero.CD = calculateDragCoefficient(fc);
@@ -144,7 +144,7 @@ AeroCoefficients Aerodynamics::computeAeroCoefficients(const FlightConditions& f
 }
 
 
-Eigen::Vector3d Aerodynamics::computeAerodynamicForce(const FlightConditions& fc, const AeroCoefficients& coeff)
+Eigen::Vector3d Aerodynamics::computeAerodynamicForce(const FlightConditions& fc, const AeroCoefficients& coeff) const
 {	
 	double S = wing_platform_area;
 	Eigen::Vector3d Fa_stability;
@@ -166,7 +166,8 @@ Eigen::Vector3d Aerodynamics::computeAerodynamicForce(const FlightConditions& fc
 
 Eigen::Vector3d Aerodynamics::computeAerodynamicMoments(const FlightConditions& fc,  
 														const AeroCoefficients& coeff,
-	                                                    const Eigen::Vector3d& forceBody)
+	                                                    const Eigen::Vector3d& forceBody
+) const
 {
 	
 	Eigen::Vector3d CM_ac_body;
@@ -191,7 +192,7 @@ Eigen::Vector3d Aerodynamics::computeAerodynamicMoments(const FlightConditions& 
 AerodynamicLoads Aerodynamics::computeAerodynamicLoads(const FlightConditions& fc,
 													   const ControlInputs& input, 
 													   const AircraftState& state
-)
+) const
 {
 	AerodynamicLoads loads{};
 	AeroCoefficients coeff = computeAeroCoefficients(fc, input, state);

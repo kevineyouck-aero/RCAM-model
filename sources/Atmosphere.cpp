@@ -1,4 +1,4 @@
-#include "Atmosphere.h"
+#include "../includes/Atmosphere.h"
 
 double Atmosphere::getRho() const
 {

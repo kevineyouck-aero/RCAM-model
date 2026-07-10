@@ -1,4 +1,4 @@
-#include "Aerodynamics.h"
+#include "../includes/Aerodynamics.h"
 #include <cassert>
 #include <cmath>
 #include <iostream>
@@ -16,7 +16,8 @@ int main() {
 
 
 	Atmosphere atmosphere;
-	Aerodynamics aero(atmosphere);
+	AircraftGeometry geometry;
+	Aerodynamics aero(atmosphere, geometry);
 
 	AircraftState s{};
 

@@ -2,6 +2,7 @@
 class AircraftGeometry
 {
 public:
+	AircraftGeometry() = default;
 	Eigen::Vector3d getCenterOfGravity() const { return r_cg; }
 	Eigen::Vector3d getAerodynamicCenter() const { return r_ac; }
 	double getCbar() const { return cbar; }
