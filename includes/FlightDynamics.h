@@ -3,6 +3,9 @@
 #include "Gravity.h"
 #include "Propulsion.h"
 
+using StateVector = Eigen::Matrix<double, 12, 1>;
+
+
 struct StateDerivatives
 {
 	double u_dot, v_dot, w_dot;
@@ -19,11 +22,20 @@ public:
 				   const Gravity& gravity,
 				   const Propulsion& propulsion,
 				   const RCAM_model& rcam);
-	StateDerivatives bodyAircraftAccelerationState(const AircraftState& state, const ControlInputs& input) const;
-	StateDerivatives bodyAircraftAngularAccelerationState(const AircraftState& state, const ControlInputs& input) const;
-	StateDerivatives bodyAircraftAngularVelocity(const AircraftState& state, const ControlInputs& input) const;
-	StateDerivatives NEDtranslationalVelocity(const AircraftState& state, const ControlInputs& input) const;
-	StateDerivatives computeStateDerivatives(const AircraftState& state, const ControlInputs& input) const;
+	Eigen::Vector3d bodyAircraftAccelerationState(const AerodynamicLoads& aeroLoads,
+												  const PropulsionLoads& engineLoads, 
+												  const GravityLoads& gravity,
+												  const AircraftState& state
+											     ) const;
+
+	Eigen::Vector3d bodyAircraftAngularAccelerationState(const AerodynamicLoads& aeroLoads,
+														 const PropulsionLoads& engineLoads,
+														 const AircraftState& state
+														 ) const;
+
+	Eigen::Vector3d bodyAircraftEulerAngleRates(const AircraftState& state) const;
+	Eigen::Vector3d nedAircraftVelocity(const AircraftState& state) const;
+	StateVector computeStateDerivatives(const AircraftState& state, const ControlInputs& input) const;
 
 private:
 	const Aerodynamics& aero_;

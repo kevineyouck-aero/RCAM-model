@@ -99,7 +99,7 @@ AeroCoefficients Aerodynamics::computeAeroCoefficients(const FlightConditions& f
 	double S = wing_platform_area;
 	double epsilon = depsda * (fc.alpha - alpha_zero_lift_angle_of_attack);
 	double cbar = geometry_.getCbar();
-	double dCMdx_normalization_scalar = cbar / max(fc.Va, 1e-6);
+	double dCMdx_normalization_scalar = cbar / std::max(fc.Va, 1e-6);
 
 	Eigen::Vector3d eta;
 	eta << -1.4 * fc.beta,
