@@ -59,9 +59,10 @@ Eigen::Vector3d FlightDynamics::bodyAircraftEulerAngleRates(const AircraftState&
 	double theta = state.theta;
 	double phi = state.phi;
 
-	const Eigen::Matrix3d H_phi_theta = { 1, std::sin(phi) * std::tan(theta), std::cos(phi) * std::tan(theta),
-										  0,			std::cos(phi),				 -std::sin(phi),
-										  0, std::sin(phi) / std::cos(theta), std::cos(phi) / std::cos(theta) };
+	Eigen::Matrix3d H_phi_theta; 
+	H_phi_theta << 1, std::sin(phi) * std::tan(theta), std::cos(phi) * std::tan(theta),
+				   0,			std::cos(phi),				 -std::sin(phi),
+				   0, std::sin(phi) / std::cos(theta), std::cos(phi) / std::cos(theta);
 	const Eigen::Vector3d bodyAngularRate = { state.p, state.q, state.r };
 
 	const Eigen::Vector3d bodyEulerAngleRates = H_phi_theta * bodyAngularRate; // Calculates the Euler angle rates
@@ -76,17 +77,20 @@ Eigen::Vector3d FlightDynamics::nedAircraftVelocity(const AircraftState& state) 
 	double psi = state.psi;
 
 	// Designs the DCM rotation matrices 
-	const Eigen::Matrix3d Cb2 = { std::cos(phi), std::sin(phi), 0,
-								 -std::sin(phi), std::cos(phi), 0,
-									    0,           0,         1 };
-	const Eigen::Matrix3d C21 = { std::cos(theta), 0, -std::sin(theta),
-									  0,           1,			 0,
-								  std::sin(theta), 0,  std::cos(theta) };
-	const Eigen::Matrix3d C1v = { 1,			0,			 0,
-								  0,  std::cos(psi), std::sin(psi),
-								  0, -std::sin(psi), std::cos(psi)};
+	Eigen::Matrix3d C1v;
+	C1v <<  std::cos(phi), std::sin(phi), 0,
+		   -std::sin(phi), std::cos(phi), 0,
+				  0,           0,         1 ;
+	Eigen::Matrix3d C21;
+	C21 << std::cos(theta), 0, -std::sin(theta),
+			   0,           1,			 0,
+		   std::sin(theta), 0,  std::cos(theta);
+	Eigen::Matrix3d Cb2;
+	Cb2 <<  1,			0,			 0,
+			0,  std::cos(psi), std::sin(psi),
+			0, -std::sin(psi), std::cos(psi);
 
-	const Eigen::Matrix3d DCM_matrix_Cbv = Cb2 * C21 * C1v;
+	const Eigen::Matrix3d DCM_matrix_Cbv = Cb2 * C21 * C1v; // Reference order matters phi -> theta -> psi
 	const Eigen::Vector3d bodyTranslationalVelocity = { state.u, state.v, state.w };
 
 	// Applies a change of frame from the body frame to the vehicle-carried NED frame
@@ -121,10 +125,9 @@ StateVector FlightDynamics::computeStateDerivatives(const AircraftState& state, 
 	StateVector stateDerivative;
 
 	// Build a state derivative vector which is a concatenation of all 4 3D vectors 
-	stateDerivative <<	uvw_dot, 
-						pqr_dot, 
-						phi_theta_psi_dot, 
-						pn_pe_pd_dot;
-
+	stateDerivative.segment<3>(0) = uvw_dot;
+	stateDerivative.segment<3>(3) = pqr_dot;
+	stateDerivative.segment<3>(6) = phi_theta_psi_dot;
+	stateDerivative.segment<3>(9) = pn_pe_pd_dot;
 	return stateDerivative;
 }

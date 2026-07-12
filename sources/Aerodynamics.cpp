@@ -1,7 +1,6 @@
 #include "../includes/Aerodynamics.h"
 #include <cmath>
 #include <iostream>
-#include <algorithm>
 
 
 Aerodynamics::Aerodynamics(const Atmosphere& atmosphere, const AircraftGeometry& geometry):
@@ -151,7 +150,7 @@ Eigen::Vector3d Aerodynamics::computeAerodynamicForce(const FlightConditions& fc
 
 	Fa_stability << -coeff.CD * fc.qbar * S,
 					 coeff.CY * fc.qbar * S,
-					 coeff.CL * fc.qbar * S;
+					-coeff.CL * fc.qbar * S;
 
 	// Rotation from the stability frame to the body frame
 	Eigen::Matrix3d Cbs;

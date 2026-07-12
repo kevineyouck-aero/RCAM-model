@@ -37,20 +37,16 @@ private:
 
 	//void calculate_forces_and_moments(const AircraftState & s, double* forces, double* moments);
 	double pi = std::numbers::pi;
-	std::pair<double, double> limit_aileron_angle = { -25 * pi / 180, 25 * pi / 180 };
-	std::pair<double, double> limit_elevation_angle = { -25 * pi / 180, 10 * pi / 180 };
-	std::pair<double, double> limit_rudder_angle = { -30 * pi / 180, 30 * pi / 180 };
-	std::pair<double, double> limit_throttle1 = { 0.5 * pi / 180, 10 * pi / 180 };
-	std::pair<double, double> limit_throttle2 = { 0.5 * pi / 180, 10 * pi / 180 };
+	std::pair<double, double> limit_aileron_angle = { -25 * pi / 180.0, 25 * pi / 180.0 };
+	std::pair<double, double> limit_elevation_angle = { -25 * pi / 180.0, 10 * pi / 180.0 };
+	std::pair<double, double> limit_rudder_angle = { -30 * pi / 180.0, 30 * pi / 180.0 };
+	std::pair<double, double> limit_throttle1 = { 0.5 * pi / 180.0, 10 * pi / 180.0 };
+	std::pair<double, double> limit_throttle2 = { 0.5 * pi / 180.0, 10 * pi / 180.0 };
 
-	const Eigen::Matrix3d inertiaMatrix = { 40.07, 0, 2.098,
-											  0,  64,   0,
-										   2.098,  0, 99.92 };
+	Eigen::Matrix3d inertiaMatrix_;
 	// Refer to RCAM documentation for this matrix
 
-	const Eigen::Matrix3d invInertiaMatrix = { 0.0249836,    0,    0.000523151,
-												  0,      0.015625,     0,
-											   0.000523151,   0,    0.010019 };
+	Eigen::Matrix3d invInertiaMatrix_; 
 	// Refer to Christopher Lum's RCAM design video about the hardcoded inverse Inertia tensor matrix
 };
 
