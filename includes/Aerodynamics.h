@@ -5,10 +5,9 @@
 #include <Eigen/Dense>
 
 /**	
-	\struct FlightConditions
-	FlightConditions is a structure design to address the aircraft parameters such as 
-	the true airspeed, the angle of attack the angle of sideslip and the dynamic
-	pressure.
+	* @struct FlightConditions
+	* 
+	* Stores the current aircraft flight conditions.
 **/
 struct FlightConditions
 {
@@ -20,12 +19,12 @@ struct FlightConditions
 };
 
 /**
-	\struct AeroCoeffiecient
-	AeroCoeffiecient is a structure design to get all the coefficients specific the RCAM
-	aircraft model. CL (Lift coefficient), CY (Sideforce coefficient) and CD (Drag 
-	coefficient) define the force coefficients. Cl (rolling moment coefficient), Cm 
-	(Pitching moment coefficient) and Cn (Yawing moment coefficient) define the moment
-	coefficients.
+	* @struct AeroCoefficients
+	* 
+	* Stores the aerodynamic force and moment coefficients of the RCAM model
+	* 
+	* CL, CY, CD aerodynamic force coefficients
+	* Cl, Cm, Cn aerodynamic moment coefficients
 **/
 struct AeroCoefficients
 {
@@ -39,9 +38,9 @@ struct AeroCoefficients
 };
 
 /**
-	\struct AerodynamicLoads
-	AerodynamicLoads is a structure design to define a 3D-vector for both aerodynamic
-	forces and moments.
+	* struct AerodynamicLoads
+	* 
+	* Contains a 3D-vector for both aerodynamic	forces and moments expressed in the body frame.
 **/
 struct AerodynamicLoads
 {
@@ -50,8 +49,9 @@ struct AerodynamicLoads
 };
 
 /**
-	\class Aerodynamics
-	Aerodynamics is a class that defines the aircraft's aerodynamics
+	* @class Aerodynamics
+	* 
+	* Aerodynamics is a class that defines the aircraft's aerodynamics
 **/
 
 class Aerodynamics
@@ -60,128 +60,108 @@ public:
 	explicit Aerodynamics(const Atmosphere& atmosphere, const AircraftGeometry& geometry);
 
 	/**
-		\fn calculateAirspeed(const AircraftState& state)
-		\brief calculates the aircraft true airspeed (m/s)
-		\param state 
-		given aircraft current state
+		* Calculates the aircraft true airspeed
+		* 
+		* @param state Current aircraft state
+		* @return True airspeed (m/s)
 	**/
 	double calculateAirspeed(const AircraftState& state) const;
 
 	/**
-		\fn calculateAlpha(const AircraftState& state)
-		\brief calculates the aircraft's angle of attack (rad)
-		\param state
-		given aircraft current state
+		* Calculates the aircraft's angle of attack
+		* 
+		* @param state Current aircraft state
+		* @return Aircraft angle of attack (rad)
 	**/
 	double calculateAlpha(const AircraftState& state) const;
 
 	/**
-		\fn calculateBeta(const AircraftState& state)
-		\brief calculates the aircraft's sideslip angle (rad)
-		\param state
-		given aircraft current state
+		* Calculates the aircraft's sideslip angle 
+		* 
+		* @param state Current aircraft state
+		* @return Aircraft sideslip angle (rad)
 	**/
 	double calculateBeta(const AircraftState& state) const;
 
 	/**
-		\fn computeFlightConditions(const AircraftState& state)
-		\brief gets the aircraft's flight conditions at a given state in time 
-		\param state
-		given aircraft current state
+		* Computes the aircraft flight conditions
+		* 
+		* @param state Current aircraft state
+		* @return Computed flight conditions
 	**/
 	FlightConditions computeFlightConditions(const AircraftState& state) const;
 
 	/**
-		\fn calculateLiftCoefficient(const FlightConditions& fc, 
-									const ControlInputs& input, 
-									const AircraftState& state) const
-
-		\brief calculates the dimensionless aircraft lift coefficient
-		\param fc
-		given given aircraft flight conditions
-		\param input
-		given control surface deflections 
-		\param state
-		given aircraft current state
+		* Calculates the dimensionless aircraft lift coefficient
+		* 
+		* @param fc Current aircraft flight conditions
+		* @param input Control surface deflections
+		* @param state Current aircraft state
+		* @return Dimensionless lift coefficient
 	**/
 	double calculateLiftCoefficient(const FlightConditions& fc, 
 									const ControlInputs& input, 
 									const AircraftState& state) const;
 
 	/**
-		\fn calculateDragCoefficient(const FlightConditions& fc) const
-		\brief calculates the dimensionless aircraft drag coefficient
-		\param fc
-		given given aircraft flight conditions
+		* Calculates the dimensionless aircraft drag coefficient
+		* 
+		* @param fc Current aircraft flight conditions
+		* @return Dimensionless drag coefficient 
 	**/
 	double calculateDragCoefficient(const FlightConditions& fc) const;
 
 	/**
-		\fn calculateSideForceCoefficient(const FlightConditions& fc, const ControlInputs& input) const
-		\brief calculates the dimensionless aircraft sideforce coefficient
-		\param fc
-		given given aircraft flight conditions
-		\param input
-		given control surface deflections
+		* Calculates the dimensionless aircraft sideforce coefficient
+		* 
+		* @param fc Current aircraft flight conditions
+		* @param input Control surface deflections
+		* @return Dimensionless side force coefficient
 	**/
 	double calculateSideForceCoefficient(const FlightConditions& fc, const ControlInputs& input) const;
 
 	/**
-		\fn computeAeroCoefficients(const FlightConditions& fc, 
-											 const ControlInputs& input, 
-											 const AircraftState& state) const
-		\brief calculates all the aerodynamic force and moment coefficients
-		\param fc
-		given given aircraft flight conditions
-		\param input
-		given control surface deflections
-		\param state
-		given aircraft current state
+		
+		* Calculates all the aerodynamic force and moment coefficients
+		* 
+		* @param fc Current aircraft flight conditions
+		* @param input Control surface deflections
+		* @param state Current aircraft state
+		* @return Aerodynamic forces and moment coefficients 
 	**/
 	AeroCoefficients computeAeroCoefficients(const FlightConditions& fc, 
 											 const ControlInputs& input, 
 											 const AircraftState& state) const;
 
 	/**
-		\fn computeAerodynamicForce(const FlightConditions& fc,	const AeroCoefficients& coeff) const
-		\brief return a 3D-vector representing the aerodynamic forces in the body frame
-		\param fc
-		given given aircraft flight conditions
-		\param coeff
-		calculated aerodynamic coefficients by the given flight conditions, control surface deflections and aircraft's 
-		current state in time.
+		* Computes the aerodynamic forces acting on the aircraft
+		* 
+		* @param fc Current aircraft flight conditions
+		* @param coeff Aerodynamic coefficients 
+		* @return Body-frame aerodynamic force
+
 	**/
 	Eigen::Vector3d computeAerodynamicForce(const FlightConditions& fc,	const AeroCoefficients& coeff) const;
 
 	/**
-		\fn computeAerodynamicMoments(const FlightConditions& fc, 
-											  const AeroCoefficients& coeff, 
-										      const Eigen::Vector3d& forceBody) const
-		\brief return a 3D-vector representing the aerodynamic moments in the body frame
-		\param fc
-		given given aircraft flight conditions
-		\param coeff
-		calculated aerodynamic coefficients by the given flight conditions, control surface deflections and aircraft's
-		current state in time.	
-		\param forceBody
-		3D-vector expressed in the body frame.
+		* Computes the aerodynamic moment acting on the aircraft
+		* 
+		* @param fc	Current aircraft flight conditions
+		* @param coeff Aerodynamic coefficients 	
+		* @param forceBody	3D-vector expressed in the body frame.
+		* @return Body-frame aerodynamic moment
 	**/
 	Eigen::Vector3d computeAerodynamicMoments(const FlightConditions& fc, 
 											  const AeroCoefficients& coeff, 
 										      const Eigen::Vector3d& forceBody) const;
 
 	/**
-		\fn computeAerodynamicLoads(const FlightConditions& fc, 
-											 const ControlInputs& input, 
-											 const AircraftState& state											 
-										     ) const
-		\brief returns loads for both aerodynamic force and moments
-		\param fc
-		given given aircraft flight conditions
-		\param input
-		given control surface deflections
-		\param state
-		given aircraft current state
+		* Computes the aerodynamic loads acting on the aircraft
+		* 
+		* @param fc	Current flight conditions
+		* @param input Control surface deflections
+		* @param state Current aircraft state
+		* @return Aerodynamic loads expressed in the body frame
 	**/
 	AerodynamicLoads computeAerodynamicLoads(const FlightConditions& fc, 
 											 const ControlInputs& input, 
