@@ -62,7 +62,7 @@ public:
 	/**
 		* Calculates the aircraft true airspeed
 		* 
-		* @param Current aircraft state
+		* @param state Current aircraft state
 		* @return True airspeed (m/s)
 	**/
 	double calculateAirspeed(const AircraftState& state) const;
@@ -70,7 +70,7 @@ public:
 	/**
 		* Calculates the aircraft's angle of attack
 		* 
-		* @param Current aircraft state
+		* @param state Current aircraft state
 		* @return Aircraft angle of attack (rad)
 	**/
 	double calculateAlpha(const AircraftState& state) const;
@@ -78,7 +78,7 @@ public:
 	/**
 		* Calculates the aircraft's sideslip angle 
 		* 
-		* @param Current aircraft state
+		* @param state Current aircraft state
 		* @return Aircraft sideslip angle (rad)
 	**/
 	double calculateBeta(const AircraftState& state) const;
@@ -86,7 +86,7 @@ public:
 	/**
 		* Computes the aircraft flight conditions
 		* 
-		* @param Current aircraft state
+		* @param state Current aircraft state
 		* @return Computed flight conditions
 	**/
 	FlightConditions computeFlightConditions(const AircraftState& state) const;
@@ -96,7 +96,7 @@ public:
 		* 
 		* @param fc Current aircraft flight conditions
 		* @param input Control surface deflections
-		* @param Current aircraft state
+		* @param state Current aircraft state
 		* @return Dimensionless lift coefficient
 	**/
 	double calculateLiftCoefficient(const FlightConditions& fc, 
@@ -126,7 +126,7 @@ public:
 		* 
 		* @param fc Current aircraft flight conditions
 		* @param input Control surface deflections
-		* @param Current aircraft state
+		* @param state Current aircraft state
 		* @return Aerodynamic forces and moment coefficients 
 	**/
 	AeroCoefficients computeAeroCoefficients(const FlightConditions& fc, 
@@ -146,7 +146,7 @@ public:
 	/**
 		* Computes the aerodynamic moment acting on the aircraft
 		* 
-		* @param fc Current aircraft flight conditions
+		* @param fc	Current aircraft flight conditions
 		* @param coeff Aerodynamic coefficients 	
 		* @param forceBody 3D-vector expressed in the body frame.
 		* @return Body-frame aerodynamic moment

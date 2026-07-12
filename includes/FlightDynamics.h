@@ -45,7 +45,7 @@ public:
 		* @param aeroLoads Structure that contains both aerodynamic forces and moments
 		* @param engineLoads Structure that contains both propulsive forces and moments
 		* @param gravityLoads Structure that contains both gravitational forces and moments 
-		* @param Current aircraft state
+		* @param state Current aircraft state
 		* @return Body-frame translational acceleration (m/s²)
 	**/
 	Eigen::Vector3d bodyAircraftAccelerationState(const AerodynamicLoads& aeroLoads,
@@ -59,7 +59,7 @@ public:
 		* 
 		* @param aeroLoads Structure that contains both aerodynamic forces and moments
 		* @param engineLoads Structure that contains both propulsive forces and moments
-		* @param Current aircraft state
+		* @param state Current aircraft state
 		* @return Body-frame angular acceleration (rad/s²)
 	**/
 	Eigen::Vector3d bodyAircraftAngularAccelerationState(const AerodynamicLoads& aeroLoads,
@@ -70,7 +70,7 @@ public:
 	/**
 		* Computes the Euler angle rates
 		* 
-		* @param Current aircraft state
+		* @param state Current aircraft state
 		* @return Euler angle rates (rad/s)
 	**/
 	Eigen::Vector3d bodyAircraftEulerAngleRates(const AircraftState& state) const;
@@ -78,7 +78,7 @@ public:
 	/**
 		* Computes the aircraft's vehicle-carried NED velocity
 		* 
-		* @param Current aircraft state
+		* @param state Current aircraft state
 		* @return Aircraft velocity expressed in the vehicle-carried NED frame (m/s)
 	**/
 	Eigen::Vector3d nedAircraftVelocity(const AircraftState& state) const;
@@ -86,7 +86,7 @@ public:
 	/**
 		* Computes the state derivative of the aircraft
 		* 
-		* @param Current aircraft state
+		* @param state Current aircraft state
 		* @param input Surface control deflections [aileron, elevator, rudder, Throttles]
 		* @return A state derivative vector
 
