@@ -103,7 +103,7 @@ AeroCoefficients Aerodynamics::computeAeroCoefficients(const FlightConditions& f
 	Eigen::Vector3d eta;
 	eta << -1.4 * fc.beta,
 		   -0.59 - (3.1 * St * lt / (S * cbar)) * (fc.alpha - epsilon),
-			(1 - fc.alpha * (180 / (15 * pi)) * fc.beta);
+			(1 - fc.alpha * (180 / (15 * pi))) * fc.beta;
 
 	//RCAM aerodynamic derivatives (NASA RCAM model)
 	Eigen::Matrix3d dCMdx_matrix;
