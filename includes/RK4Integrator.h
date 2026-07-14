@@ -18,7 +18,7 @@ public:
 	StateVector step(const FlightDynamics& dynamics,
 				     const StateVector& state, 
 					 const ControlInputs& input,
-					 double stepTime) const;	
+					 double dt) const;	
 private:
 
 };

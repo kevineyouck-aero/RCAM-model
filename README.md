@@ -7,22 +7,27 @@
 ![Linear Algebra](https://img.shields.io/badge/Eigen-3-success)
 
 ## Overview
-The main objective of this project is to implement a nonlinear 6-DOF Research Civil Aircraft Model (RCAM) within a C++ framework to reproduce as faithfully as possible the aircraft dynamics to support future control laws, trimming, linearization, and autopilot design. This project is intended to strengthen practical experience in aircraft flight dynamics, stability and control and aerospace software development.
+The main objective of this project is to implement a nonlinear 6-DOF Research Civil Aircraft Model (RCAM) 
+within a C++ framework to reproduce the aircraft dynamics as faithfully as possible while providing a 
+modular framework for flight control laws, trimming, linearization, and autopilot implementation. 
+This project is intended to strengthen practical experience in aircraft flight dynamics, stability 
+and control and aerospace software development.
 
 ## Mathematical Model
-
 The simulator implements a nonlinear 6-DOF equations of motion using the Newton-Euler formulation.
 
-### State vector
+```text
+State vector
 x = [u v w p q r φ θ ψ pN pE pD]ᵀ
-
+```
 ### Control Inputs
+```text
 u = [δa δe δr δT1 δT2]ᵀ
-
+```
 The simulator numerically evaluates 
-
+```text
 ẋ = f(x,u)
-
+```
 at every simulation step
 
 
@@ -37,9 +42,9 @@ at every simulation step
 - [x] Flight condition computation
 - [x] Modular object-oriented architecture
 - [x] Eigen-based linear algebra
+- [x] RK4 integrator
 
 ### Planned
-- [ ] RK4 integrator
 - [ ] Complete simulation loop
 - [ ] Aircraft trimming
 - [ ] Linearization
@@ -63,6 +68,16 @@ at every simulation step
             │
             ▼
     AircraftGeometry
+            |
+            ▼
+      RK4Integrator
+            |
+            ▼
+     Simulation Data
+            |
+            ▼
+        CSV Output
+
 ```
 
 
@@ -86,23 +101,21 @@ The current implementation has been validated by reproducing the trim condition 
 Validation includes:
 
 - Flight condition computation
-
 - Aerodynamic force and moment generation
-
 - Gravity model
-
 - Propulsion model
-
 - 6-DOF Newton-Euler equations
-
 - Trim condition verification
+- RK4 numerical integration
+- Long-term trim simulation with CSV data export
 
 ## Build 
+### Requirements
 - C++ Visual Studio 2026
 - Eigen 3
 - C++17	
 
-Build instructions will be added as the project progresses.
+Simulation results can be exported in a CSV file format for visualization
 
 ## Roadmap
 - [x] Atmosphere
@@ -111,8 +124,10 @@ Build instructions will be added as the project progresses.
 - [x] Propulsion
 - [x] Gravity
 - [x] Flight Dynamics
+- [x] RK4 Integrator
+- [x] CSV Data Export 
 
-- [ ] RK4 Integrator
+### Next step
 - [ ] Simulation Loop
 - [ ] Linearization
 - [ ] Flight Control Laws
@@ -125,8 +140,16 @@ Build instructions will be added as the project progresses.
 	2. **Flight Dynamics and Control - Dr Christopher Lum (University of Washington)**
 	 https://www.youtube.com/playlist?list=PLxdnSsBqCrrFlrvFM7YV7PTb7TUEYf3_0
 
-	3. Stevens, B. L., Lewis, F. L., and Johnson, E. N. Aircraft Control and Simulation 3rd Edition Wiley
+    3.  Stevens, B. L.
+        Lewis, F. L.
+        Johnson, E. N.
 
+        Aircraft Control and Simulation:
+        Dynamics, Controls Design, and Autonomous Systems
+
+        3rd Edition
+
+        John Wiley & Sons
 
 
 
