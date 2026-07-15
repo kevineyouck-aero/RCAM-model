@@ -11,7 +11,7 @@ bool near(double a, double b, double tol = 1e-6) {
 }
 
 
-/*int main() {
+int main() {
 
 
 	Atmosphere atmosphere;
@@ -39,4 +39,4 @@ bool near(double a, double b, double tol = 1e-6) {
 	std::cout << "or " << (180 / std::numbers::pi) * aero.calculateBeta(s) << " degrees." << std::endl;
 
 	return 0;
-}*/
+}

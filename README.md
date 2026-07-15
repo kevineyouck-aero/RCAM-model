@@ -15,9 +15,8 @@ and control and aerospace software development.
 
 ## Mathematical Model
 The simulator implements a nonlinear 6-DOF equations of motion using the Newton-Euler formulation.
-
+### State vector
 ```text
-State vector
 x = [u v w p q r φ θ ψ pN pE pD]ᵀ
 ```
 ### Control Inputs
@@ -111,11 +110,12 @@ Validation includes:
 
 ## Build 
 ### Requirements
-- C++ Visual Studio 2026
+- Microsoft Visual Studio 
 - Eigen 3
 - C++17	
 
-Simulation results can be exported in a CSV file format for visualization
+Simulation results can be exported in a CSV file format for post-processing and visualization using
+MATLAB, Python or spreadsheet
 
 ## Roadmap
 - [x] Atmosphere
@@ -140,16 +140,9 @@ Simulation results can be exported in a CSV file format for visualization
 	2. **Flight Dynamics and Control - Dr Christopher Lum (University of Washington)**
 	 https://www.youtube.com/playlist?list=PLxdnSsBqCrrFlrvFM7YV7PTb7TUEYf3_0
 
-    3.  Stevens, B. L.
-        Lewis, F. L.
-        Johnson, E. N.
-
-        Aircraft Control and Simulation:
-        Dynamics, Controls Design, and Autonomous Systems
-
-        3rd Edition
-
-        John Wiley & Sons
+    3.  Stevens, B. L. Lewis, F. L. Johnson, E. N.
+        *Aircraft Control and Simulation:Dynamics, Controls Design, and Autonomous Systems*
+        3rd Edition John Wiley & Sons
 
 
 
