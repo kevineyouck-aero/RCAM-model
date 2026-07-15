@@ -3,7 +3,7 @@
 
 
 
-/*int main() {
+int main() {
 	
 	const AircraftState trimState{ 84.9905,0,1.2713,0,0,0,0,0.0149,0,0,0,500 };
 	const ControlInputs trimInput{ 0,-0.1780,0,0.0821,0.0821 };
@@ -30,4 +30,4 @@
 	StateVector dx = flightDynamics.computeStateDerivatives(trimState, trimInput);
 	std::cout <<"xdot:\n" << dx << std::endl;
 	return 0;
-}*/
+}

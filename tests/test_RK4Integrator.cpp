@@ -13,7 +13,7 @@ static void writeAircraftStateResults(std::ofstream& o, const StateVector& vecto
 }
 
 
-/*int main() {
+int main() {
 	
 	RK4Integrator rk4;
 	const AircraftState trimState{ 84.9905,0,1.2713,0,0,0,0,0.0149,0,0,0,500 };
@@ -50,4 +50,4 @@ static void writeAircraftStateResults(std::ofstream& o, const StateVector& vecto
 	}
 	aircraftFile.close();
 	return 0;
-}*/
+}
