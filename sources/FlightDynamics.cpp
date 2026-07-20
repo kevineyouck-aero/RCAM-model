@@ -95,7 +95,6 @@ Eigen::Vector3d FlightDynamics::nedAircraftVelocity(const AircraftState& state) 
 
 	// Applies a change of frame from the body frame to the vehicle-carried NED frame
 	const Eigen::Vector3d NED_velocity = DCM_matrix_Cbv.transpose() * bodyTranslationalVelocity;
-
 	return NED_velocity;
 }
 

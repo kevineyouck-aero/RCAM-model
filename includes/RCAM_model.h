@@ -27,7 +27,6 @@ public:
 	double getAircraftMass() const;
 	Eigen::Matrix3d getBodyInertiaTensorMatrix() const;
 	Eigen::Matrix3d getInvBodyInertiaTensorMatrix() const;
-	//void step(double dt, const vector<double>& controls);
 	
 	
 private:
@@ -35,7 +34,6 @@ private:
 	ControlInputs input_;
 	static constexpr double mass_ = 120000.0;		// Aircraft's nominal mass according to RCAM documentation (kg)	
 
-	//void calculate_forces_and_moments(const AircraftState & s, double* forces, double* moments);
 	double pi = std::numbers::pi;
 	std::pair<double, double> limit_aileron_angle = { -25 * pi / 180.0, 25 * pi / 180.0 };
 	std::pair<double, double> limit_elevation_angle = { -25 * pi / 180.0, 10 * pi / 180.0 };
